@@ -1,32 +1,68 @@
 using Game;
+using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class UserInterface : MonoBehaviour
 {
+    [SerializeField] private SceneController controller;
     [SerializeField] private TextMeshProUGUI day;
     [SerializeField] private TextMeshProUGUI hour;
+    [SerializeField] private GameObject computer;
+    [SerializeField] private GameObject bed;
+    [SerializeField] private GameObject overlay;
 
-    void Update()
+    private bool showingComputer = true;
+
+    private void Start()
     {
-        day.text = $"{Language.Instance.GetUIText(UIKeys.day)} {DayCycle.Instance.Day}";
-        hour.text = DayCycle.Instance.GetFormattedTime();
+        InputHandler.OnObjectEnter += ShowLabel;
+        InputHandler.OnObjectClick += ShowLabel;
+        InputHandler.OnObjectLeave += HideLabel;
+        StartCoroutine(UpdateClock());
+    }
+
+    private void HideLabel()
+    {
+        overlay.SetActive(false);
+    }
+
+    private void ShowLabel(string action)
+    {
+        overlay.GetComponent<TextMeshProUGUI>().text = action;
+        overlay.SetActive(true);
+    }
+
+    private IEnumerator UpdateClock()
+    {
+        while (true)
+        {
+            if (DayCycle.Instance != null)
+            {
+                day.text = $"{GameText.Instance.GetUIText(UIKeys.day)} {DayCycle.Instance.Day}";
+                hour.text = DayCycle.Instance.GetFormattedTime();
+            }
+            yield return new WaitForSeconds(1f);
+        }
     }
 
     public void OnExitPressed()
     {
-        SceneManager.LoadScene("3_good_1");
+        GameStateManager.Instance.isEnding1 = true;
+        controller.LoadScene("3_ending");
     }
 
     public void OnMoveScene()
     {
-        var currentScene = SceneManager.GetActiveScene().name;
+        showingComputer = !showingComputer;
+        computer.SetActive(showingComputer);
+        bed.SetActive(!showingComputer);
+    }
 
-        if (currentScene == "1_computer")
-            SceneManager.LoadScene("2_bed");
-        else if (currentScene == "2_bed")
-            SceneManager.LoadScene("1_computer");
-
+    private void OnDestroy()
+    {
+        InputHandler.OnObjectEnter -= ShowLabel;
+        InputHandler.OnObjectClick -= ShowLabel;
+        InputHandler.OnObjectLeave -= HideLabel;
     }
 }

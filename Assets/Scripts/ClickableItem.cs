@@ -8,6 +8,7 @@ namespace Game
         [SerializeField] private ActionKeys[] actions;
         private ActionKeys oldAction;
         private ActionKeys action;
+        public ActionKeys Action { get { return action; } }
 
         private void Start()
         {
@@ -44,7 +45,7 @@ namespace Game
         {
             DayCycle.OnTimeAdded?.Invoke((int)duration);
             PickAction();
-            Debug.Log($"Action picked: {action}");
         }
+
     }
 }

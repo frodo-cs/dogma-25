@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -6,11 +7,15 @@ namespace Game
 {
     public class InputHandler : MonoBehaviour, GameInput.IPlayerActions
     {
-        private GameInput input;
         [SerializeField] private Camera mainCamera;
         [SerializeField] private LayerMask layerMask;
-        [SerializeField] private Texture2D cursor;
-        [SerializeField] private Texture2D hoverCursor;
+
+        public static Action<string> OnObjectEnter;
+        public static Action OnObjectLeave;
+        public static Action<string> OnObjectClick;
+
+        private Transform lastHovered;
+        private GameInput input;
 
         private void Awake()
         {
@@ -21,17 +26,6 @@ namespace Game
                 mainCamera = Camera.main;
         }
 
-        private void Update()
-        {
-            var mousePos = mainCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-            RaycastHit2D hit = Physics2D.CircleCast(mousePos, 0.2f, Vector2.zero, 0.1f, layerMask);
-
-            if (hit.transform != null)
-                Cursor.SetCursor(hoverCursor, Vector2.zero, CursorMode.Auto);
-            else
-                Cursor.SetCursor(cursor, Vector2.zero, CursorMode.Auto);
-        }
-
         private void OnEnable()
         {
             input.Player.Enable();
@@ -40,6 +34,31 @@ namespace Game
         private void OnDisable()
         {
             input.Player.Disable();
+        }
+
+
+        private void Update()
+        {
+            var mousePos = mainCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+            RaycastHit2D hit = Physics2D.CircleCast(mousePos, 0.2f, Vector2.zero, 0.1f, layerMask);
+
+            Transform current = hit.transform;
+
+            if (current != null && current != lastHovered)
+            {
+                var clickable = current.GetComponent<ClickableItem>();
+                if (clickable != null)
+                {
+                    OnObjectEnter?.Invoke(GameText.Instance.GetActionText(clickable.Action));
+                }
+            }
+
+            if (lastHovered != null && current != lastHovered)
+            {
+                OnObjectLeave?.Invoke();
+            }
+
+            lastHovered = current;
         }
 
         public void OnClick(InputAction.CallbackContext context)
@@ -54,10 +73,12 @@ namespace Game
             RaycastHit2D hit = Physics2D.CircleCast(mousePos, 0.2f, Vector2.zero, 0.1f, layerMask);
             if (hit.transform != null)
             {
-                Debug.Log($"Hit: {hit.collider.gameObject.name}");
                 var clickable = hit.collider.GetComponent<ClickableItem>();
                 if (clickable != null)
+                {
                     clickable.OnClick();
+                    OnObjectClick?.Invoke(GameText.Instance.GetActionText(clickable.Action));
+                }
             }
         }
     }

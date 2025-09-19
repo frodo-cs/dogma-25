@@ -6,11 +6,10 @@ namespace Game
     {
         public static GameStateManager Instance { get; private set; }
 
-        public float TimeOfDay { get; set; }
+        public int SecondsOfDay { get; set; }
         public int Day { get; set; }
         public int MaxDay { get; set; }
-        public bool IsGameEnded { get; set; }
-        public Languages Language { get; set; } = Languages.SPANISH;
+        public bool isEnding1 { get; set; }
 
         private void Awake()
         {
