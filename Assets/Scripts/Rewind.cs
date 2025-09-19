@@ -18,7 +18,8 @@ namespace Game
 
         private void StopRoutine(int obj)
         {
-            StopCoroutine(rewindAnimation);
+            if (rewindAnimation != null)
+                StopCoroutine(rewindAnimation);
         }
 
         private void PlayRewind(string obj)

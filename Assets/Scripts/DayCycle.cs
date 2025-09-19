@@ -21,6 +21,7 @@ namespace Game
         [SerializeField] private SceneController controller;
 
         public int Day { get { return day; } }
+        public int SecondsOfDay { get { return secondsOfDay; } }
         public static Action<int> OnDayEnded;
         public static Action<int> OnTimeAdded;
         public static Action OnLastDay;

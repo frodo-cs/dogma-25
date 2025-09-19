@@ -58,7 +58,7 @@ namespace Game
 
         private void OnDestroy()
         {
-            DayCycle.OnDayEnded += FadeInOut;
+            DayCycle.OnDayEnded -= FadeInOut;
         }
     }
 
